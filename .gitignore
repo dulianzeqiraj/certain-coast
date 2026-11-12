@@ -1,0 +1,8 @@
+*.asv
+*.m~
+*.mex*
+octave-workspace
+slprj/
+results/
+*.nc
+data/restricted/

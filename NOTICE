@@ -1,0 +1,12 @@
+CERTAIN-COAST
+Copyright 2026 Dulian Zeqiraj
+
+This product is developed at the Faculty of Geology and Mining, Polytechnic University of Tirana, Albania.
+It is prepared for the NATO Science for Peace and Security (SPS) Programme application CERTAIN-COAST
+(call 2027-1).
+
+The packages certaincoast.model and certaincoast.network are rewritten from the author's code for
+Zeqiraj, D. (2026), Journal of Hydrology 680, 136559 (released earlier under the MIT License by the same author).
+No field data are included.
+
+Licensed under the Apache License, Version 2.0 (see LICENSE).

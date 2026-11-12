@@ -1,0 +1,38 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+title: "CERTAIN-COAST: certified early warning for coastal aquifers and infrastructure"
+type: software
+authors:
+  - family-names: Zeqiraj
+    given-names: Dulian
+    affiliation: "Faculty of Geology and Mining, Polytechnic University of Tirana, Albania"
+    # orcid: "https://orcid.org/XXXX-XXXX-XXXX-XXXX"   (add your ORCID and remove the #)
+version: 0.1.0
+date-released: "2026-11-12"
+license: Apache-2.0
+repository-code: "https://github.com/dulianzeqiraj/certain-coast"
+keywords:
+  - early warning
+  - seawater intrusion
+  - groundwater
+  - conformal prediction
+  - boundary conditions
+  - MATLAB
+  - GNU Octave
+references:
+  - type: article
+    title: "Goal-oriented Bayesian experimental design for variable-density seawater intrusion: adjoint expected information gain for joint monitoring and managed-aquifer-recharge placement"
+    authors:
+      - family-names: Zeqiraj
+        given-names: Dulian
+    journal: "Journal of Hydrology"
+    volume: 680
+    start: 136559
+    year: 2026
+    doi: "10.1016/j.jhydrol.2026.136559"
+abstract: >-
+  Open-source MATLAB code (also runs in GNU Octave) of the CERTAIN-COAST project, version 0.1.0: alarms whose miss
+  rate is stated in advance and checked in operation; warnings for chloride crossings between laboratory samples; a
+  learnable inland boundary for the flow equation; recharge from groundwater heads; a steady variable-density flow
+  and salt model of a coastal section (Henry benchmark); and goal-oriented design of monitoring and recharge wells
+  from two adjoint solves. A fast machine-learned copy of the model and the decision tools follow in later versions.
