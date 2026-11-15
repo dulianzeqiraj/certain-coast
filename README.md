@@ -21,28 +21,30 @@ against every logged outcome.
 | `certaincoast.betweensamples` | probability that chloride crosses the limit *between* laboratory samples; robust band over all models the record allows; certified widening; value of a logger or of paired samples | available |
 | `certaincoast.boundary` | inland boundary of the model replaced by a passive Robin term and storage compartments (exact, reduced, or learned from two piezometers) | available |
 | `certaincoast.recharge` | soil-water balance from rain to the head of a well; recharge from heads; the anchor needed to fix its amount | available |
-| `certaincoast.model` | steady variable-density flow and salt transport in a coastal section, with a sparse coloured Jacobian (Henry benchmark); compaction, liquefaction and coastal water level follow in WP2 | available (flow and salt) |
+| `certaincoast.model` | steady variable-density flow and salt transport in a coastal section, with a sparse coloured Jacobian (Henry benchmark); a synthetic plan-view confined coastal aquifer for calibration and design tests; compaction, liquefaction and coastal water level follow in WP2 | available (flow and salt) |
 | `certaincoast.network` | monitoring and recharge design for the decision: goal-oriented information gain from two adjoint solves, greedy and exhaustive design, facies prior and pooling loss, information about a yes/no question (is a supply well salinised?), recharge sites that lower that risk | available |
+| `certaincoast.calibration` | calibration when the model may be wrong (TRIAL-GO): competing model structures are the arms of a bandit; each play is one Levenberg-Marquardt iteration, checked against a metered pumping stop the structure was not fitted to; the robust Gittins index of Cohen and Treetanthiploet (2022) spends the budget of model runs on the structures that predict | available |
 | `certaincoast.surrogate` | fast machine-learned copy of the model with a certified error bound | planned (WP2) |
 | `certaincoast.decisions` | safe operating window, pumping rule and safe pumping tests | planned (WP5) |
 
 ## Requirements
 
 MATLAB R2016b or later, or GNU Octave 7 or later. **No toolbox is needed**: only core functions are used
-(`betaincinv`, `fminbnd`, `fzero`, `lsqnonneg`, `erfcinv`).
+(`betaincinv`, `betainc`, `fminbnd`, `fzero`, `lsqnonneg`, `erfcinv`, `interp2`).
 
 ## Install and test
 
 ```matlab
 % from the folder of the repository
 addpath(pwd)
-run_tests                          % 36 tests, about 20 s
+run_tests                          % 47 tests, about 30 s
 run examples/example_alarm.m
 run examples/example_between_samples.m
 run examples/example_boundary.m
 run examples/example_recharge.m
 run examples/example_henry.m
 run examples/example_network.m
+run examples/example_trial_go.m      % about a minute
 ```
 
 In GNU Octave, from a terminal: `octave --eval "run_tests"`.
@@ -60,6 +62,14 @@ kGrid = exp(linspace(log(1/400), log(4), 41));
 curve = certaincoast.betweensamples.crossingProbability(kGrid, (250 - 180)/35, 120);
 [~, kLo, kHi] = certaincoast.betweensamples.timeScaleInterval(sampleDays, standardisedChloride, kGrid);
 [pLo, pHi] = certaincoast.betweensamples.crossingBand(kLo, kHi, kGrid, curve);
+
+% calibration when the model may be wrong: five structures of a synthetic aquifer and a budget of model runs
+M    = certaincoast.model.planAquifer();
+arms = certaincoast.calibration.aquiferArms(M, pump);                % pump: current and planned pumping (m3/d)
+cal  = struct('rows', 1:25,  'd', heads, 'sigma', 0.05);             % heads under the current pumping
+val  = struct('rows', 26:75, 'd', stops, 'sigma', 0.01);             % metered head changes of two pumping stops
+R    = certaincoast.calibration.trialGo(arms, cal, val, struct('budget', 213));
+g    = certaincoast.calibration.aquiferGoal(R.final, M);              % future heads at the supply wells; risk
 ```
 
 Output of the examples (synthetic data):
@@ -80,14 +90,48 @@ Output of the examples (synthetic data):
   same information (0.499 against 0.500 nats).
 * **Recharge:** from heads with 1 cm noise, daily error 2.8 mm and monthly error 2.6 mm (mean monthly recharge
   32 mm); heads alone cannot fix the amount, so one anchor (pumping test, soil probe or chloride balance) is needed.
+* **Calibration (TRIAL-GO):** 30 synthetic truths of a coastal aquifer, each richer than all five structures (a
+  sub-zonal field that none can represent; a low-conductivity coastal strip in 15 of them that only one has). After
+  calibration on the heads, the metered stops fall outside the 90% intervals of the structures A1-A5 at the rates
+  0.42, 0.78, 0.66, 0.31 and 0.26 (no strip) and 0.63, 0.91, 0.71, 0.48 and 0.38 (strip): the stops reveal the wrong
+  structures that the heads let pass. The 90% intervals of the future head at the two supply wells cover the truth in
+  0.47 and 0.43 of the truths for PEST practice (zones, recharge fixed, heads only), 0.63 and 0.63 for PEST on all
+  data and 0.67 and 0.63 for TRIAL-GO (CRPS 0.93, 0.51 and 0.42 m; wrong safe/unsafe decisions 0.23, 0.13 and 0.13),
+  with a budget of 213 model runs (266 with the final calibration on all data). All five structures with BIC
+  selection, then all data, cost 427 runs and do best (CRPS 0.28 m, wrong decisions 0.03). No method reaches 0.90,
+  because no structure holds the sub-zonal field. Numbers from GNU Octave 8.4 (the random streams of MATLAB differ).
 
-## Origin of the model and network packages
+## Figures
+
+The folder `figures` holds the MATLAB scripts of the figures and diagrams of the project (synthetic data only). Each
+writes PNG and vector PDF files to `results/figures`, which git does not track.
+
+| Script | Figure |
+|---|---|
+| `run_all_figures.m` | the publication figures of the alarm, between-samples, boundary, recharge, Henry and network examples |
+| `robust_certified_network.m` | salinity sensors placed robustly, with a certificate of optimality, when sensors share errors (common error of a data-logger hub, model error correlated over distance; sealed reference channels) |
+| `trial_go_scheme.m` | diagram: how TRIAL-GO calibrates when the model may be wrong |
+| `solution_flowchart.m` | flowchart: the problems of the project and how it observes, models and calibrates, warns, decides and delivers |
+
+```matlab
+addpath figures
+run_all_figures                    % about 40 s in GNU Octave
+robust_certified_network           % about 2.5 minutes
+trial_go_scheme
+solution_flowchart
+```
+
+In GNU Octave without a display: `xvfb-run -a octave --no-gui --eval "addpath figures; run_all_figures"`.
+
+## Origin of the model, network and calibration packages
 
 `certaincoast.model` and `certaincoast.network` come from the author's code for goal-oriented experimental design of
 seawater intrusion and its application to the Fushë-Kuqe coastal aquifer (Zeqiraj, D., 2026, *Journal of Hydrology*
 680, 136559, https://doi.org/10.1016/j.jhydrol.2026.136559). They are rewritten here without any field data:
 the residual is vectorised (identical to the original to the last digit), the Jacobian is sparse and coloured, and
-every test runs on the synthetic Henry section.
+every test runs on the synthetic Henry section. `certaincoast.calibration` comes from the author's calibration
+study of the same Fushë-Kuqe model (TRIAL-GO); here it runs on a synthetic plan-view aquifer
+(`certaincoast.model.planAquifer`), again without any field data.
 
 ## Data and security
 
@@ -106,5 +150,5 @@ Apache License 2.0 (see [LICENSE](LICENSE) and [NOTICE](NOTICE)).
 ## Acknowledgement
 
 Prepared for the NATO Science for Peace and Security (SPS) Programme application CERTAIN-COAST (call 2027-1), with the
-Environmental Science Center of Qatar University as partner and the Ministry of Infrastructure and Energy of Albania as
-end-user.
+Environmental Science Center of Qatar University as partner and the Institute of Geosciences (IGJEO) of the Polytechnic
+University of Tirana as end-user.

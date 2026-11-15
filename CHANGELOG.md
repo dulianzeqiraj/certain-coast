@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.2.0 (in preparation)
+* `certaincoast.calibration` (new): calibration when the model may be wrong (TRIAL-GO). Competing model structures
+  are the arms of a bandit; a play is one Levenberg-Marquardt iteration with a prior (`lmStart`, `lmStep`,
+  `lmPredict`), checked against a validation item the structure was not fitted to; the robust Gittins index of
+  Cohen and Treetanthiploet (2022, Appendix D; `robustGittinsTable`, `robustGittinsIndex`) decides the next play
+  (`trialGo`, with UCB, Thompson and greedy indices for comparison). Synthetic benchmark: five structures of a coastal
+  aquifer, truths richer than all of them, metered pumping stops, future heads and intrusion risk at two supply
+  wells (`aquiferArms`, `aquiferTruth`, `aquiferOutputs`, `aquiferGoal`).
+* `certaincoast.model`: plan-view confined coastal aquifer (`planAquifer`, synthetic) and its steady heads from one
+  factorisation (`planHeads`), with reciprocity and flux-scale invariance.
+* `figures/`: scripts of the publication figures of the examples (`run_all_figures.m`), of the robust certified
+  sensor network (`robust_certified_network.m`) and of the diagrams of TRIAL-GO and of the whole solution
+  (`trial_go_scheme.m`, `solution_flowchart.m`).
+* 11 new tests (47 in all) and `examples/example_trial_go.m`.
+
 ## 0.1.0 (2026-11-12)
 * First public release, in MATLAB; the same code runs in GNU Octave. No toolbox is needed.
 * `certaincoast.alarms`: split-conformal alarm margin for a stated miss rate; exact (Clopper-Pearson) bound on the
