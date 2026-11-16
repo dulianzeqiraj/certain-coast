@@ -4,5 +4,5 @@ function v = version()
 
 %   Copyright 2026 Dulian Zeqiraj. Licensed under the Apache License, Version 2.0.
 
-v = '0.2.0-dev';
+v = '0.2.0';
 end

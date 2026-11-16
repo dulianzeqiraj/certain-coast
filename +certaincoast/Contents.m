@@ -1,6 +1,5 @@
 % CERTAIN-COAST: certified early warning for coastal aquifers and infrastructure.
-% Version 0.2.0-dev (in preparation; 0.1.0 released 2026-11-12). MATLAB R2016b or later, or GNU Octave 7 or later;
-% no toolbox is needed.
+% Version 0.2.0 (2026-11-16). MATLAB R2016b or later, or GNU Octave 7 or later; no toolbox is needed.
 %
 % Packages
 %   certaincoast.alarms          - alarms whose miss rate is stated in advance and checked in operation
@@ -13,6 +12,8 @@
 %                                  adjoint sensitivities, facies prior, risk of a salinised supply well
 %   certaincoast.calibration     - calibration when the model may be wrong: TRIAL-GO, a robust bandit (robust Gittins
 %                                  index) over competing model structures, checked by metered pumping stops
+%   certaincoast.motion          - land motion and relative sea level from InSAR and GNSS: rates, earthquake steps
+%                                  and seasons with honest errors, two-orbit decomposition, public product reader
 %   certaincoast.util            - bounded nonlinear least squares, bivariate normal distribution
 %
 % Planned (released as the project progresses)

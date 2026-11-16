@@ -24,20 +24,21 @@ against every logged outcome.
 | `certaincoast.model` | steady variable-density flow and salt transport in a coastal section, with a sparse coloured Jacobian (Henry benchmark); a synthetic plan-view confined coastal aquifer for calibration and design tests; compaction, liquefaction and coastal water level follow in WP2 | available (flow and salt) |
 | `certaincoast.network` | monitoring and recharge design for the decision: goal-oriented information gain from two adjoint solves, greedy and exhaustive design, facies prior and pooling loss, information about a yes/no question (is a supply well salinised?), recharge sites that lower that risk | available |
 | `certaincoast.calibration` | calibration when the model may be wrong (TRIAL-GO): competing model structures are the arms of a bandit; each play is one Levenberg-Marquardt iteration, checked against a metered pumping stop the structure was not fitted to; the robust Gittins index of Cohen and Treetanthiploet (2022) spends the budget of model runs on the structures that predict | available |
+| `certaincoast.motion` | land motion and relative sea level from InSAR and GNSS: rate, earthquake steps, seasons and post-seismic settling of a displacement series with honest (AR(1)) errors; vertical and east-west motion from two orbits; relative sea-level rate; reader of public InSAR products (EGMS, LiCSBAS) | available |
 | `certaincoast.surrogate` | fast machine-learned copy of the model with a certified error bound | planned (WP2) |
 | `certaincoast.decisions` | safe operating window, pumping rule and safe pumping tests | planned (WP5) |
 
 ## Requirements
 
 MATLAB R2016b or later, or GNU Octave 7 or later. **No toolbox is needed**: only core functions are used
-(`betaincinv`, `betainc`, `fminbnd`, `fzero`, `lsqnonneg`, `erfcinv`, `interp2`).
+(`betaincinv`, `betainc`, `fminbnd`, `fzero`, `lsqnonneg`, `erfcinv`, `interp2`, `datenum`).
 
 ## Install and test
 
 ```matlab
 % from the folder of the repository
 addpath(pwd)
-run_tests                          % 47 tests, about 30 s
+run_tests                          % 54 tests, about 30 s
 run examples/example_alarm.m
 run examples/example_between_samples.m
 run examples/example_boundary.m
@@ -45,6 +46,7 @@ run examples/example_recharge.m
 run examples/example_henry.m
 run examples/example_network.m
 run examples/example_trial_go.m      % about a minute
+run examples/example_motion.m
 ```
 
 In GNU Octave, from a terminal: `octave --eval "run_tests"`.
@@ -70,6 +72,12 @@ cal  = struct('rows', 1:25,  'd', heads, 'sigma', 0.05);             % heads und
 val  = struct('rows', 26:75, 'd', stops, 'sigma', 0.01);             % metered head changes of two pumping stops
 R    = certaincoast.calibration.trialGo(arms, cal, val, struct('budget', 213));
 g    = certaincoast.calibration.aquiferGoal(R.final, M);              % future heads at the supply wells; risk
+
+% land motion from InSAR seen from two orbits, and relative sea level
+FA = certaincoast.motion.fitMotionSeries(t, losAsc, struct('steps', quake));   % rate, step, seasons, AR(1) errors
+FD = certaincoast.motion.fitMotionSeries(t, losDesc, struct('steps', quake));
+[vUp, ~, sUp] = certaincoast.motion.losToVertical(FA.rate, FD.rate, uAsc, uDesc, FA.rateSigma, FD.rateSigma);
+[rsl, sRsl] = certaincoast.motion.relativeSeaLevel(seaRate, seaSigma, vUp, sUp);
 ```
 
 Output of the examples (synthetic data):
@@ -100,6 +108,12 @@ Output of the examples (synthetic data):
   with a budget of 213 model runs (266 with the final calibration on all data). All five structures with BIC
   selection, then all data, cost 427 runs and do best (CRPS 0.28 m, wrong decisions 0.03). No method reaches 0.90,
   because no structure holds the sub-zonal field. Numbers from GNU Octave 8.4 (the random streams of MATLAB differ).
+* **Land motion:** a synthetic coastal point seen every 6 days from two orbits (2016-2026), sinking 4.0 mm/yr with a
+  15 mm step in an earthquake, seasonal swelling and post-seismic settling: the two fitted series give a vertical
+  rate of -4.13 +- 0.16 mm/yr and a vertical step of -16 mm; with correlated errors the honest rate uncertainty is
+  about 1.7 times the white-noise one. With a sea rising 3.3 mm/yr (assumed), the relative sea level rises
+  7.4 +- 0.4 mm/yr, 178 mm more by 2050 at constant rates. Public products (for example EGMS) are read with
+  `readSeriesCsv`; results for individual assets are not published here.
 
 ## Figures
 

@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.2.0 (in preparation)
+## 0.2.0 (2026-11-16)
 * `certaincoast.calibration` (new): calibration when the model may be wrong (TRIAL-GO). Competing model structures
   are the arms of a bandit; a play is one Levenberg-Marquardt iteration with a prior (`lmStart`, `lmStep`,
   `lmPredict`), checked against a validation item the structure was not fitted to; the robust Gittins index of
@@ -13,7 +13,12 @@
 * `figures/`: scripts of the publication figures of the examples (`run_all_figures.m`), of the robust certified
   sensor network (`robust_certified_network.m`) and of the diagrams of TRIAL-GO and of the whole solution
   (`trial_go_scheme.m`, `solution_flowchart.m`).
-* 11 new tests (47 in all) and `examples/example_trial_go.m`.
+* `certaincoast.motion` (new): land motion and relative sea level from InSAR and GNSS. Fit of a displacement series
+  (rate, steps such as an earthquake, annual and semi-annual cycle, logarithmic post-seismic term) with AR(1)
+  errors, so that rates are not over-confident (`fitMotionSeries`); vertical and east-west motion from two
+  orbits (`losToVertical`); relative sea-level rate and its extrapolation (`relativeSeaLevel`); reader of public
+  InSAR products with one column per date, such as EGMS (`readSeriesCsv`); `decimalYear`.
+* 18 new tests (54 in all), `examples/example_trial_go.m` and `examples/example_motion.m`.
 
 ## 0.1.0 (2026-11-12)
 * First public release, in MATLAB; the same code runs in GNU Octave. No toolbox is needed.
